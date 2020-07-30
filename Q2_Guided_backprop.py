@@ -16,6 +16,7 @@ class CustomReLU(torch.autograd.Function):
 		input, = ctx.saved_tensors
 		grad_input = grad_output.clone()
 		grad_input[input < 0] = 0
+		grad_input[grad_output < 0] = 0
 		return grad_input
 
 
@@ -122,17 +123,20 @@ if __name__ == '__main__':
 	from guidedbpcodehelpers import imshow2
 
 	dataloader = get_Dataloader()
-	inputs = next(iter(dataloader))
-
-	image = inputs["image"]
-	print(image.shape)
-	file_name = inputs["filename"]
 
 	model = models.vgg16(pretrained=True)
-
 	guided_bp = Guided_backprop(model)
-	result = guided_bp.process(image, None)
 
-	imshow2(result, image)
+	show_how_many_images = 1
+	for i in range(show_how_many_images):
+		inputs = next(iter(dataloader))
+
+		image = inputs["image"]
+		print(image.shape)
+		file_name = inputs["filename"]
+
+		result = guided_bp.process(image, None)
+
+		imshow2(result, image)
 
 	print('END')

@@ -74,6 +74,8 @@ class ResultStatistics():
 
 
 if __name__ == '__main__':
+	import matplotlib.pyplot as plt
+
 	VGG16_statistics = ResultStatistics("VGG16_L2Norm")
 	VGG16bn_statistics = ResultStatistics("VGG16bn_L2Norm")
 
@@ -83,20 +85,77 @@ if __name__ == '__main__':
 	VGG16_medians = {}
 	VGG16bn_medians = {}
 
+	print(f"\n{'-'*20} VGG16 {'-'*20}\n")
+
 	VGG16_medians["layer1"] = VGG16_statistics.layer1_median()
 	VGG16_medians["layer2"] = VGG16_statistics.layer2_median()
-
-	VGG16bn_medians["layer1"] = VGG16bn_statistics.layer1_median()
-	VGG16bn_medians["layer2"] = VGG16bn_statistics.layer2_median()
-
+	print(f"VGG16 medians:")
+	print(f"layer1: {VGG16_medians['layer1']}")
+	print(f"layer2: {VGG16_medians['layer2']}")
 
 	for p in range(5, 100, 5):
 		VGG16_percentiles[p] = {}
 		VGG16_percentiles[p]["layer1"] = VGG16_statistics.layer1_percentile(p)
 		VGG16_percentiles[p]["layer2"] = VGG16_statistics.layer2_percentile(p)
+		print(f"VGG16 {p} percentile:")
+		print(f"layer1: {VGG16_percentiles[p]['layer1']}")
+		print(f"layer2: {VGG16_percentiles[p]['layer2']}")
 
+	print(f"\n{'-'*20} VGG16bn {'-'*20}\n")
+
+	VGG16bn_medians["layer1"] = VGG16bn_statistics.layer1_median()
+	VGG16bn_medians["layer2"] = VGG16bn_statistics.layer2_median()
+	print(f"VGG16bn medians:")
+	print(f"layer1: {VGG16bn_medians['layer1']}")
+	print(f"layer2: {VGG16bn_medians['layer2']}")
+
+	for p in range(5, 100, 5):
 		VGG16bn_percentiles[p] = {}
 		VGG16bn_percentiles[p]["layer1"] = VGG16bn_statistics.layer1_percentile(p)
 		VGG16bn_percentiles[p]["layer2"] = VGG16bn_statistics.layer2_percentile(p)
+		print(f"VGG16bn {p} percentile:")
+		print(f"layer1: {VGG16bn_percentiles[p]['layer1']}")
+		print(f"layer2: {VGG16bn_percentiles[p]['layer2']}")
+
+
+	def show_medians(medians_dict, medians_name):
+		t1 = medians_dict["layer1"].numpy()
+		t2 = medians_dict["layer2"].numpy()
+
+		fig, axs = plt.subplots(1, 2)
+		axs[0].bar(range(len(t1)), t1, label=f"{medians_name}: layer1")
+		axs[0].legend()
+		axs[1].bar(range(len(t2)), t2, label=f"{medians_name}: layer2")
+		axs[1].legend()
+		plt.savefig(medians_name)
+		plt.show()
+
+	def show_percentiles(statistics, figure_name):
+		x = list(range(100))
+		p1 = [statistics.layer1_percentile(i).unsqueeze(1) for i in x]
+		p1 = torch.cat(p1, dim=1)
+
+		p2 = [statistics.layer2_percentile(i).unsqueeze(1) for i in x]
+		p2 = torch.cat(p2, dim=1)
+
+		fig, axs = plt.subplots(1, 2)
+		for n, channel in enumerate(p1):
+			axs[0].plot(x, channel.numpy(), label=f"ch {n+1}")
+		axs[0].legend()
+
+		for n, channel in enumerate(p2):
+			axs[1].plot(x, channel.numpy(), label=f"ch {n+1}")
+		axs[1].legend()
+
+		plt.title(figure_name)
+		plt.savefig(figure_name)
+		plt.show()
+
+
+	show_medians(VGG16_medians, "VGG16_medians")
+	show_medians(VGG16bn_medians, "VGG16bn_medians")
+
+	show_percentiles(VGG16_statistics, "VGG16_percentiles")
+	show_percentiles(VGG16bn_statistics, "VGG16bn_percentiles")
 
 	print("Done")

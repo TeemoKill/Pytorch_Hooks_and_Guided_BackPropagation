@@ -91,11 +91,7 @@ class Hooker():
 					print(f"{sub_module} -> backward_hook registered")
 			else:
 				break
-		#
-		# for name, module in modules:
-		# 	for sub_name, sub_module in module.named_children():
-		# 		# sub_module.register_forward_hook(module_forward_hook)
-		# 		sub_module.register_backward_hook(module_backward_hook)
+
 
 	def channelwise_l2_norm(self, t):
 		norm = torch.norm(t, p=2, dim=(2, 3))
@@ -135,8 +131,6 @@ class Hooker():
 
 
 
-
-
 if __name__ == '__main__':
 	from guidedbpcodehelpers import imshow2
 
@@ -159,90 +153,3 @@ if __name__ == '__main__':
 
 		if i%10 == 0:
 			print(f"image {i} processed")
-
-#
-# total_feat_out = []
-# total_feat_in = []
-#
-# def module_forward_hook(module, input, output):
-# 	print(module)
-# 	print("input: ", input)
-# 	print("output: ", output)
-# 	total_feat_out.append(output)
-# 	total_feat_in.append(input)
-#
-#
-# def module_backward_hook(module, grad_input, grad_output):
-# 	print("Module_Name: ", module)
-# 	print("grad_output: ", grad_output)
-# 	print("grad_input: ", grad_input)
-#
-# 	if isinstance(module, nn.Conv2d):
-# 		grad_input_tensor = grad_input[0]
-# 		l2_norm = grad_input_tensor.norm(2, 1, True)
-# 		norm = F.normalize(grad_input_tensor, p=2, dim=1)
-#
-# 	total_feat_in.append(grad_input)
-# 	total_feat_out.append(grad_output)
-#
-#
-#
-# modules = VGG16.named_children()
-# for name, module in modules:
-# 	# module.register_forward_hook(module_forward_hook)
-# 	for sub_name, sub_module in module.named_children():
-# 		sub_module.register_backward_hook(module_backward_hook)
-#
-#
-# def normalize(I):
-# 	# 归一化梯度map，先归一化到 mean=0 std=1
-# 	norm = (I - I.mean()) / I.std()
-# 	# 把 std 重置为 0.1，让梯度map中的数值尽可能接近 0
-# 	norm = norm * 0.1
-# 	# 均值加 0.5，保证大部分的梯度值为正
-# 	norm = norm + 0.5
-# 	# 把 0，1 以外的梯度值分别设置为 0 和 1
-# 	norm = norm.clip(0, 1)
-# 	return norm
-#
-#
-# dataloader = get_Dataloader()
-# inputs = next(iter(dataloader))
-#
-# image = inputs["image"]
-# print(image.shape)
-# file_name = inputs["filename"]
-#
-# image = image.requires_grad_()
-#
-# model_output = VGG16(image)
-# VGG16.zero_grad()
-# pred_class = model_output.argmax().item()
-#
-# grad_target_map = torch.zeros(
-# 	model_output.shape,
-# 	dtype=torch.float
-# )
-# grad_target_map[0][pred_class] = 1
-#
-# model_output.backward(grad_target_map)
-# print(type(total_feat_in[-1]))
-# print(type(total_feat_in[-1][0]))
-#
-# result = total_feat_in[-1][0].data[0]  # .permute(1, 2, 0)
-# print(result.shape)
-# plt.imshow(normalize(result.permute(1, 2, 0).numpy()))
-# plt.show()
-#
-# imshow2(result, image)
-#
-#
-# print("========== saved inputs and outputs ==========")
-# for idx in range(len(total_feat_in)):
-# 	print("input: ", total_feat_in[idx])
-# 	print("output: ", total_feat_out[idx])
-
-
-
-
-
